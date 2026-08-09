@@ -314,15 +314,15 @@ class MemoryAgent:
         if not google_api_key and hasattr(st, "secrets"):
             google_api_key = st.secrets.get("GOOGLE_API_KEY") or st.secrets.get("GEMINI_API_KEY")
 
-        # Stop execution gracefully if the key is missing or is still an unconfigured example string
+        # 3. Stop gracefully if key is missing or invalid
         if not google_api_key or "EXAMPLE" in str(google_api_key).upper():
-            st.error("🔑 `GOOGLE_API_KEY` is missing or invalid! Please check your Streamlit Secrets.")
+            st.error("🔑 `GOOGLE_API_KEY` is missing or invalid! Please check Streamlit Cloud Secrets.")
             st.stop()
 
-        # 3. Explicitly set env var so Google GenAI SDK reliably detects API key authentication
+        # 4. Explicitly assign environment variable for Google GenAI SDK compatibility
         os.environ["GOOGLE_API_KEY"] = str(google_api_key).strip()
 
-        # 4. Initialize LLM
+        # 5. Initialize Google Gemini LLM
         self.llm = ChatGoogleGenerativeAI(
             model=model,
             google_api_key=os.environ["GOOGLE_API_KEY"],
@@ -341,22 +341,22 @@ class MemoryAgent:
         messages = [
             SystemMessage(content=f"{SYSTEM_PROMPT}\n\nRelevant memories:\n{memory_context}")
         ]
-        messages.extend(self.session_history[-10:])  # Last 10 turns of this session
+        messages.extend(self.session_history[-10:])  # Keep last 10 turns of current session
         messages.append(HumanMessage(content=user_message))
 
-        # 3. Call LLM with error catching
+        # 3. Call LLM with error handling to catch and display underlying issues
         try:
             response = self.llm.invoke(messages)
             reply = response.content
         except Exception as e:
-            st.error(f"⚠️ **Google API Error:** {e}")
-            return "Sorry, I couldn't communicate with Gemini right now. Please check your API key or quota."
+            st.error(f"⚠️ **Gemini API Error:** {e}")
+            return "Sorry, I couldn't process that request due to an API error."
 
         # 4. Update session history
         self.session_history.append(HumanMessage(content=user_message))
         self.session_history.append(AIMessage(content=reply))
 
-        # 5. Persist this exchange to long-term memory
+        # 5. Persist exchange to long-term memory
         self.memory.add_memory(user_message, reply)
 
         return reply
