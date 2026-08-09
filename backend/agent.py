@@ -81,7 +81,7 @@ If nothing relevant is remembered, just answer normally.
 
 
 class MemoryAgent:
-    def __init__(self, user_id: str, openai_api_key: str = None, model: str = "gemini-2.5-flash"):
+    def __init__(self, user_id: str, openai_api_key: str = None, model: str = "gemini-1.5-flash"):
         # openai_api_key is optional — only used if you want OpenAI embeddings
         # for memory search instead of the free local embedding model.
         self.openai_api_key = openai_api_key or os.getenv("OPENAI_API_KEY")
