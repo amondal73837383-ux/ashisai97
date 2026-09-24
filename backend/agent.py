@@ -46,6 +46,7 @@
 #         ]
 #         messages.extend(self.session_history[-10:])  # last 10 turns of this session
 #         messages.append(HumanMessage(content=user_message))
+#
 
 #         # 3. Call the LLM
 #         response = self.llm.invoke(messages)
